@@ -4,7 +4,7 @@ extends Resource
 const PlayerInfo = preload("res://resources/PlayerInfo.gd")
 const RoundInfo = preload("res://resources/RoundInfo.gd")
 
-enum { WAITING, HINTING, GUESSING, SCORING }
+enum { WAITING, HINTING, GUESSING, SCORING, STARTING, JOINING }
 export (int) var status
 export (Array, int) var players_ids
 export (String) var game_id
@@ -67,7 +67,7 @@ func ready_hinter ():
 		return false
 
 	players[hinter_id].status = PlayerInfo.READY
-	
+
 	return true
 
 func ready_guesser (pid: int, guess_degree: float):
@@ -101,14 +101,22 @@ func get_players_info ():
 	return players_info
 
 func get_lobby_info ():
-	if curr_round:
-		return { "status": "starting-round" }
+	if curr_round == null:
+		return {
+			"status": STARTING,
+			"game_id": game_id,
+			"players": get_players_info(),
+			"round": null
+		}
 
-	return { 
-		"status": "joining",
+	return {
+		"status": JOINING,
+		"game_id": game_id,
 		"players": get_players_info(),
-		"hinter": hinter_id,
-		"guesses": curr_round.get_guesses()
+		"round": {
+			"hinter": hinter_id,
+			"guesses": curr_round.get_guesses()
+		}
 	}
 
 func is_guesser (pid: int):
