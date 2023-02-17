@@ -83,14 +83,12 @@ remote func join_lobby (pid: int, gid: String, pname: String):
 
 func remove_from_lobby (pid: int):
 	var lobby: LobbyInfo = get_lobby(pid)
-	print("remove %d from lobby " % pid, lobby.game_id)
-
 	Server.ONLINE_PLAYERS.erase(pid)
 	if lobby == null or not lobby.remove_player(pid):
 		print("lobby non-existent or invalid player")
 		return
 
-	print("%d removed" % pid)
+	print("removed %d from lobby " % pid, lobby.game_id)
 	if lobby.is_empty():
 		print("deleting %s empty lobby")
 		_open_lobbies.erase(lobby.game_id)
