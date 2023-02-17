@@ -9,7 +9,7 @@ var guesses_degrees: Dictionary
 
 func _init (curr_players: int):
 	Server.rng.randomize()
-	
+
 	hinter_idx = Server.rng.randi() % curr_players
 	guessing_players = curr_players - 1
 	scoring_players = curr_players - 1

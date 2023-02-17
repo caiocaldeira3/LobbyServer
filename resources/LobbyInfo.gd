@@ -4,7 +4,7 @@ extends Resource
 const PlayerInfo = preload("res://resources/PlayerInfo.gd")
 const RoundInfo = preload("res://resources/RoundInfo.gd")
 
-enum { WAITING, HINTING, GUESSING, SCORING, STARTING, JOINING }
+enum LOBBY_STATUS { WAITING, HINTING, GUESSING, SCORING, STARTING, JOINING }
 export (int) var status
 export (Array, int) var players_ids
 export (String) var game_id
@@ -18,7 +18,7 @@ func _init (gid: String, pid: int, hname: String):
 	game_id = gid
 	players_ids = [ pid ]
 	players = { pid: PlayerInfo.new(hname) }
-	status = WAITING
+	status = LOBBY_STATUS.WAITING
 	max_size = 8
 	curr_players = 1
 	curr_round = null
@@ -52,20 +52,21 @@ func start_round ():
 
 	for pid in players_ids:
 		if pid != hinter_id:
-			players[pid].status = PlayerInfo.GUESSING
+			players[pid].status = PlayerInfo.PLAYER_STATUS.GUESSING
 
 		else:
-			players[pid].status = PlayerInfo.HINTING
+			players[pid].status = PlayerInfo.PLAYER_STATUS.HINTING
 
 	return hinter_id
 
-func ready_hinter ():
+func ready_hinter (score_degree: float):
 	if curr_round == null:
 		return false
 
 	if players.get(hinter_id, null) == null:
 		return false
 
+	curr_round.set_score_degree(score_degree)
 	players[hinter_id].status = PlayerInfo.READY
 
 	return true
@@ -88,7 +89,7 @@ func update_score (pid: int, score: int):
 		return false
 
 	player.score += score
-	player.status = PlayerInfo.WAITING
+	player.status = PlayerInfo.PLAYER_STATUS.WAITING
 	curr_round.decrement_scoring_players()
 
 	return true
@@ -103,14 +104,14 @@ func get_players_info ():
 func get_lobby_info ():
 	if curr_round == null:
 		return {
-			"status": STARTING,
+			"status": LOBBY_STATUS.STARTING,
 			"game_id": game_id,
 			"players": get_players_info(),
 			"round": null
 		}
 
 	return {
-		"status": JOINING,
+		"status": LOBBY_STATUS.JOINING,
 		"game_id": game_id,
 		"players": get_players_info(),
 		"round": {
@@ -121,7 +122,7 @@ func get_lobby_info ():
 
 func is_guesser (pid: int):
 	var player = players.get(pid, null)
-	return player != null and player.status == PlayerInfo.GUESSING
+	return player != null and player.status == PlayerInfo.PLAYER_STATUS.GUESSING
 
 func is_empty ():
 	return curr_players == 0
