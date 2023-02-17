@@ -34,4 +34,4 @@ func _player_connected(id):
 func _player_disconnected(id):
 	print(str(id) + " left the game.")
 
-	Lobby.disconnect_player(id)
+	Lobby.remove_from_lobby(id)

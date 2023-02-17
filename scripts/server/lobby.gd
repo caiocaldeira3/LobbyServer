@@ -86,17 +86,20 @@ func remove_from_lobby (pid: int):
 	print("remove %d from lobby " % pid, lobby.game_id)
 
 	Server.ONLINE_PLAYERS.erase(pid)
-	if lobby != null and lobby.remove_player(pid):
-		print("%d removed" % pid)
-		if lobby.is_empty():
-			print("deleting %s empty lobby")
-			_open_lobbies.erase(lobby.game_id)
+	if lobby == null or not lobby.remove_player(pid):
+		print("lobby non-existent or invalid player")
+		return
 
-		else:
-			print(
-				"synchronize with online players that %d left the lobby" % pid
-			)
-			synchronize_lobby(pid, lobby, "exit_lobby", { "id": pid })
+	print("%d removed" % pid)
+	if lobby.is_empty():
+		print("deleting %s empty lobby")
+		_open_lobbies.erase(lobby.game_id)
+
+	else:
+		print(
+			"synchronize with online players that %d left the lobby" % pid
+		)
+		synchronize_lobby(pid, lobby, "exit_lobby", { "id": pid })
 
 remote func exit_lobby (id: int):
 	remove_from_lobby(id)
